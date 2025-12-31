@@ -1,0 +1,28 @@
+{
+  "name": "local-totp",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "type-check": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitest/ui": "^1.0.0",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^12.10.3",
+    "typescript": "^5.9.3",
+    "vite": "^5.0.0",
+    "vitest": "^1.6.1",
+    "vue-tsc": "^3.2.1"
+  }
+}
