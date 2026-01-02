@@ -2,6 +2,10 @@
 
 纯前端、完全离线的 TOTP（Google Authenticator 兼容）验证器应用。
 
+## 在线演示
+
+🚀 **在线体验**: https://c-v-c-v.github.io/local-totp/
+
 ## 功能特性
 
 ✅ **完全离线运行** - 无需网络连接，所有计算在本地完成  
@@ -58,6 +62,21 @@ npm run type-check
 
 ```bash
 npm run build
+```
+
+### 部署
+
+项目配置了 GitHub Actions 自动部署：
+
+- 推送到 `main` 分支自动触发构建和部署
+- 自动运行测试，测试通过后部署到 GitHub Pages
+- 部署地址: https://c-v-c-v.github.io/local-totp/
+
+手动部署：
+
+```bash
+npm run build
+# 将 dist 目录部署到任意静态托管服务
 ```
 
 ## 使用说明
