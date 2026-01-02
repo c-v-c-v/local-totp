@@ -2,6 +2,14 @@
   <div class="app">
     <header class="app-header">
       <h1>🔐 TOTP 验证器</h1>
+      <div class="header-actions">
+        <button @click="showExportDialog = true" class="btn-header" title="导出备份">
+          📤 导出
+        </button>
+        <button @click="showImportDialog = true" class="btn-header" title="导入备份">
+          📥 导入
+        </button>
+      </div>
     </header>
 
     <main class="app-main">
@@ -27,6 +35,19 @@
       @submit="handleSubmit"
       @close="handleCloseForm"
     />
+
+    <ExportDialog
+      v-if="showExportDialog"
+      :tokens="tokens"
+      @close="showExportDialog = false"
+    />
+
+    <ImportDialog
+      v-if="showImportDialog"
+      :existing-tokens="tokens"
+      @import="handleImport"
+      @close="showImportDialog = false"
+    />
   </div>
 </template>
 
@@ -36,10 +57,15 @@ import type { Token, TokenInput } from './types'
 import { tokenRepository } from './repository'
 import TokenList from './components/TokenList.vue'
 import TokenForm from './components/TokenForm.vue'
+import ExportDialog from './components/ExportDialog.vue'
+import ImportDialog from './components/ImportDialog.vue'
+import type { ImportResult } from './utils/export'
 
 const tokens = ref<Token[]>([])
 const showForm = ref(false)
 const editingToken = ref<Token | null>(null)
+const showExportDialog = ref(false)
+const showImportDialog = ref(false)
 
 // 加载所有 Token
 const loadTokens = () => {
@@ -81,6 +107,44 @@ const handleCloseForm = () => {
   editingToken.value = null
 }
 
+// 导入
+const handleImport = (result: ImportResult, strategy: 'skip' | 'overwrite' | 'keep-both') => {
+  try {
+    let imported = 0
+    let skipped = 0
+
+    for (const tokenData of result.tokens) {
+      const isDuplicate = result.duplicates.includes(tokenData.name)
+
+      if (isDuplicate) {
+        if (strategy === 'skip') {
+          skipped++
+          continue
+        } else if (strategy === 'overwrite') {
+          // 找到现有token并删除
+          const existing = tokens.value.find(t => t.name === tokenData.name)
+          if (existing) {
+            tokenRepository.delete(existing.id)
+          }
+        } else if (strategy === 'keep-both') {
+          // 重命名
+          tokenData.name = `${tokenData.name} (导入)`
+        }
+      }
+
+      tokenRepository.create(tokenData)
+      imported++
+    }
+
+    loadTokens()
+    showImportDialog.value = false
+
+    alert(`导入成功！\n新增：${imported} 个\n跳过：${skipped} 个`)
+  } catch (error) {
+    alert('导入失败：' + (error as Error).message)
+  }
+}
+
 // 初始化加载
 onMounted(() => {
   loadTokens()
@@ -98,7 +162,7 @@ onMounted(() => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 16px 20px;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
@@ -109,6 +173,28 @@ onMounted(() => {
   margin: 0;
   font-size: 24px;
   color: #212121;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-header {
+  padding: 8px 16px;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #424242;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-header:hover {
+  background: #e0e0e0;
+  transform: translateY(-1px);
 }
 
 .app-main {
