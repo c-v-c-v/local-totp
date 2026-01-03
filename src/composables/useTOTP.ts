@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { generateTOTP } from '../utils/totp'
 import { useCountdown } from './useCountdown'
 import type { TOTPState } from '../types'
@@ -24,6 +24,21 @@ export function useTOTP(secret: string): TOTPState {
     if (val === 30) {
       updateCode()
     }
+  })
+
+  // 页面可见性变化时强制刷新验证码
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      updateCode()
+    }
+  }
+
+  onMounted(() => {
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+  })
+
+  onUnmounted(() => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
   })
 
   return {
